@@ -1,0 +1,404 @@
+<!DOCTYPE HTML>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Timeline | 신인류 연대기</title>
+  <meta http-equiv="x-ua-compatible" content="IE=edge">
+
+  <style type="text/css">
+    body, html {
+      font-family: sans-serif;
+    }
+
+    .vis-item.color-episode-1 {
+      background-color: #a6cee3;
+      color: #1a1a1a;
+    }
+
+    .vis-item.color-episode-2 {
+      background-color: #1f78b4;
+      color: #f2f2f2;
+    }
+
+    .vis-item.color-episode-3 {
+      background-color: #b2df8a;
+      color: #1a1a1a;
+    }
+
+    .vis-item.color-episode-4 {
+      background-color: #33a02c;
+      color: #f2f2f2;
+    }
+
+    .vis-item.color-episode-5 {
+      background-color: #fb9a99;
+      color: #1a1a1a;
+    }
+
+    .vis-item.color-episode-6 {
+      background-color: #e31a1c;
+      color: #f2f2f2;
+    }
+
+    .vis-item.color-episode-7 {
+      background-color: #fdbf6f;
+      color: #1a1a1a;
+    }
+
+    .vis-item.color-episode-8 {
+      background-color: #ff7f00;
+      color: #1a1a1a;
+    }
+
+    .vis-item.color-episode-9 {
+      background-color: #cab2d6;
+      color: #1a1a1a;
+    }
+
+    .vis-item.color-episode-10 {
+      background-color: #ffff99;
+      color: #1a1a1a;
+    }
+
+    .vis-item.color-episode-11 {
+      background-color: #b15928;
+      color: #f2f2f2;
+    }
+  </style>
+
+  <!-- https://visjs.github.io/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js -->
+  <script src="resources/js/vis/vis-timeline-graph2d.min.js"></script>
+  <!-- https://visjs.github.io/vis-timeline/styles/vis-timeline-graph2d.min.css -->
+  <link href="resources/css/vis/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css"/>
+
+</head>
+<body>
+
+<p>
+  https://seaborn.pydata.org/tutorial/color_palettes.html
+</p>
+<p>
+  다음 사각형을 클릭하여 Timeline 의 해당 episode visibility 를 설정할 수 있음
+</p>
+<svg width="660" height="55">
+  <rect data-episode="1" id="episode-rect-1" x="0" y="0" width="55" height="55" style="fill:rgba(166,206,227,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+  <rect data-episode="2" id="episode-rect-2" x="55" y="0" width="55" height="55" style="fill:rgba(31,120,180,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+  <rect data-episode="3" id="episode-rect-3" x="110" y="0" width="55" height="55" style="fill:rgba(178,223,138,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+  <rect data-episode="4" id="episode-rect-4" x="165" y="0" width="55" height="55" style="fill:rgba(51,160,44,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+  <rect data-episode="5" id="episode-rect-5" x="220" y="0" width="55" height="55" style="fill:rgba(251,154,153,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+  <rect data-episode="6" id="episode-rect-6" x="275" y="0" width="55" height="55" style="fill:rgba(227,26,28,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+  <rect data-episode="7" id="episode-rect-7" x="330" y="0" width="55" height="55" style="fill:rgba(253,191,111,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+  <rect data-episode="8" id="episode-rect-8" x="385" y="0" width="55" height="55" style="fill:rgba(255,127,0,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+  <rect data-episode="9" id="episode-rect-9" x="440" y="0" width="55" height="55" style="fill:rgba(202,178,214,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+  <rect data-episode="10" id="episode-rect-10" x="495" y="0" width="55" height="55" style="fill:rgba(255,255,153,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+  <rect data-episode="11" id="episode-rect-11" x="550" y="0" width="55" height="55" style="fill:rgba(177,89,40,0.99);stroke-width:2;stroke:rgb(255,255,255)"
+        onclick="toggleVisible(this)"></rect>
+
+  <text data-episode="1" x="15" y="35" font-family="Verdana" font-size="15" fill="#1a1a1a" onclick="toggleVisible(this)">032</text>
+  <text data-episode="2" x="70" y="35" font-family="Verdana" font-size="15" fill="#f2f2f2" onclick="toggleVisible(this)">034</text>
+  <text data-episode="3" x="125" y="35" font-family="Verdana" font-size="15" fill="#1a1a1a" onclick="toggleVisible(this)">036</text>
+  <text data-episode="4" x="180" y="35" font-family="Verdana" font-size="15" fill="#f2f2f2" onclick="toggleVisible(this)">037</text>
+  <text data-episode="5" x="230" y="35" font-family="Verdana" font-size="15" fill="#1a1a1a" onclick="toggleVisible(this)">039a</text>
+  <text data-episode="6" x="290" y="35" font-family="Verdana" font-size="15" fill="#f2f2f2" onclick="toggleVisible(this)">040</text>
+  <text data-episode="7" x="345" y="35" font-family="Verdana" font-size="15" fill="#1a1a1a" onclick="toggleVisible(this)">042</text>
+  <text data-episode="8" x="400" y="35" font-family="Verdana" font-size="15" fill="#1a1a1a" onclick="toggleVisible(this)">043</text>
+  <text data-episode="9" x="455" y="35" font-family="Verdana" font-size="15" fill="#1a1a1a" onclick="toggleVisible(this)">044</text>
+  <text data-episode="10" x="510" y="35" font-family="Verdana" font-size="15" fill="#1a1a1a" onclick="toggleVisible(this)">045</text>
+  <text data-episode="11" x="565" y="35" font-family="Verdana" font-size="15" fill="#f2f2f2" onclick="toggleVisible(this)">046</text>
+</svg>
+
+<p>
+  A basic timeline. You can move and zoom the timeline, and select items.
+</p>
+<p>
+  신인류 연대기 timeline
+</p>
+
+<div id="visualization"></div>
+
+<script type="text/javascript">
+  // DOM element where the Timeline will be attached
+  const container = document.getElementById('visualization');
+  const episodeTitles = [
+    '032. 스톨만의 좋까',
+    '034. 성당과 시장과 특허',
+    '036. PC와 청년들',
+    '037. 작고 부드러운 왕자',
+    '039a. 은 윈텔',
+    '040. 무한 접속호의 항해',
+    '042. 기본교양 게임사의 잉해',
+    '043. 기본교양 콘솔사의 잉해',
+    '044. 기본교양 게임문학의 잉해',
+    '045. 기본교양 게임문화의 잉해',
+    '046. 모바일 전투'
+  ];
+  const items = [
+    // {id: 3, content: 'item 3', start: '2014-04-18'},
+    // {id: 4, content: 'item 4', start: '2014-04-16', end: '2014-04-19'},
+    // {id: 6, content: 'item 6', start: '2014-04-27', type: 'point'}
+    // 1화
+    {episode: 1, start: '1946-02-14', content: '애니악', detail: '애니악이란 최초의 컴퓨터가 필라델피아시의 전원을 끊어버렸다는 기사를 냄(사실이 아님)'},
+    {episode: 1, start: '1971-01-01', content: '스톨만 MIT', detail: 'Richard Matthew Stallman MIT 인공지능 연구소에 들어감'},
+    {episode: 1, start: '1973-01-01', content: 'Unix', detail: '1970년대 초 벨 연구소 unix 개발'},
+    {episode: 1, start: '1976-04-11', content: 'Apple I', detail: 'Apple I 컴퓨터 만들어짐'},
+    {episode: 1, start: '1985-10-04', content: '스톨만 GNU 선언문', detail: '스톨만 GNU 선언문 발표, FSF 설립'},
+    {episode: 1, start: '1998-01-01', content: '한국어 GNU 선언문', detail: '송창훈 GNU 선언문 한국어로 번역'},
+    {episode: 1, start: '2001-04-01', content: 'Just for Fun', detail: 'Linus Torvalds 자서전 <Just for Fun>'},
+    {episode: 1, start: '2006-11-16', content: '스톨만 내한', detail: '스톨만 한국 방문 성공회대에서 강연'},
+    // 2화
+    {episode: 2, start: '1984-01-01', content: 'OpenOffice', detail: 'OpenOffice 출시'},
+    {episode: 2, start: '1985-01-01', content: 'NeXT 설립', detail: '스티브 잡스 애플에서 쫓겨난 후 NeXT 설립'},
+    {episode: 2, start: '1987-01-01', content: '미닉스', detail: '탄넨바움 교수 미닉스 출시'},
+    {episode: 2, start: '1987-05-23', content: 'gcc', detail: 'gcc 개발'},
+    {episode: 2, start: '1989-06-07', content: 'bash', detail: '브라이언 폭스 bash 개발 후 GNU 기증'},
+    {episode: 2, start: '1989-09-18', content: 'NeXTSTEP', detail: 'NeXTSTEP 출시, 후에 OSX 으로 발전됨'},
+    {episode: 2, start: '1991-04-01', content: 'Linux', detail: '리누스 토발즈 미닉스 수정을 거부당해 kernel v0.0.1 GPL 로 공개'},
+    {episode: 2, start: '1994-01-01', content: 'OPENSTEP', detail: 'NeXT, Sun OPENSTEP 출시, 후에 GNUstep 이란 branch 도 생성됨'},
+    {episode: 2, start: '1996-02-15', content: 'gimp', detail: 'gimp 출시'},
+    {episode: 2, start: '1999-09-30', content: '성당과 시장', detail: '에릭 레이먼드 <성당과 시장>'},
+    // 3화
+    {episode: 3, start: '1972-01-01', content: '스티브 잡스 대학교 중퇴', detail: '스티브 잡스 리드 대학교 중퇴'},
+    {episode: 3, start: '1972-01-01', content: '블루박스', detail: '원하는 주파수를 발생시키고 과금을 멈추고 전화하는 블루박스를 개발함(범죄임)'},
+    {episode: 3, start: '1974-02-01', content: '스티브 잡스 아타리', detail: '스티브 잡스 게임회사 아타리 입사'},
+    {episode: 3, start: '1975-01-01', content: '2600Hz', detail: '휘슬러 조, 휘파람의 특정 주파수에 의해 전화기가 꺼지거나 그런 동작을 알아냄'},
+    {episode: 3, start: '1975-04-04', content: 'MS 설립', detail: 'MITS(계측장비회사) 직원이었던 폴 앨런, 빌 게이츠 퇴사 후 MS 설립'},
+    {episode: 3, start: '1976-04-11', content: 'Apple I', detail: '아타리 스티브 잡스, HP 스티브 워즈니악 홈브루 컴퓨터 클럽에서 Apple I 컴퓨터 만들어짐'},
+    {episode: 3, start: '1976-01-01', content: 'CP/M', detail: '게리 킬달 CP/M 출시'},
+    {episode: 3, start: '1977-04-01', content: 'Apple II', detail: 'Apple II 출시, 5년 후 매출 10억$ 달성'},
+    {episode: 3, start: '1978-01-01', content: 'Intel 8086 CPU', detail: 'Intel 8086 CPU 출시(16비트)'},
+    {episode: 3, start: '1978-01-01', content: 'Motorola MC68K', detail: '모토로라 MC68K 출시'},
+    {episode: 3, start: '1979-01-01', content: 'Intel 8088 CPU', detail: 'Intel 8088 CPU 출시(8비트)'},
+    {episode: 3, start: '1979-01-01', content: 'Apple II MO/DEM', detail: '헤이즈 애플2 용 MO/DEM 출시'},
+    {episode: 3, start: '1979-01-01', content: 'VisiCalc', detail: 'VisiCorp VisiCalc 출시(SpreadSheet) 여기 사람들이 후에 lotus, quattro, excel 개발'},
+    {episode: 3, start: '1980-01-01', content: 'IBM Computer', detail: 'IBM Computer 사업'},
+    // 4화
+    {episode: 4, start: '1980-01-01', content: 'Seagate 5MB HDD', detail: 'Seagate 5MB 최초 개인용 HDD(5.25")'},
+    {episode: 4, start: '1980-01-01', content: 'CD 오디오 규격', detail: 'Sony, philips Redbook CD 오디오 관련 규격'},
+    {episode: 4, start: '1980-05-19', content: 'Apple III', detail: 'Apple III(폭망, 너무 high end, 쿨러 없음)'},
+    {episode: 4, start: '1982-02-16', content: 'COMPAQ', detail: 'COMPAQ 설립'},
+    {episode: 4, start: '1983-01-19', content: 'Apple Lisa', detail: 'Apple Lisa'},
+    {episode: 4, start: '1981-01-01', content: '86-DOS', detail: '시애틀 컴퓨터 프로덕트 86-DOS'},
+    {episode: 4, start: '1981-08-12', content: 'IBM 5150', detail: 'IBM Project Acorn, IBM 5150'},
+    {episode: 4, start: '1983-03-08', content: 'IBM XT 5160', detail: 'IBM XT 5160 최초 HDD 내장 PC'},
+    {episode: 4, start: '1984-01-01', content: '스티브 잡스 Apple 쫓겨남', detail: '스티브 잡스 Apple 쫓겨남'},
+    {episode: 4, start: '1984-01-01', content: 'IBM 5170 AT 80286', detail: 'IBM 5170 AT 80286'},
+    {episode: 4, start: '1984-02-01', content: 'Dell 설립', detail: 'Dell 설립'},
+    {episode: 4, start: '1994-07-11', content: '게리 킬달 사고사', detail: '게리 킬달 사고사'},
+    // 5화
+    {episode: 5, start: '1981-11-09', content: 'SGI', detail: '실리콘 그래픽스 설립'},
+    {episode: 5, start: '1985-04-26', content: 'ARM', detail: 'ARM 설립'},
+    {episode: 5, start: '1991-01-01', content: 'DEC', detail: 'Digital Equipment Corporation Alpha chip'},
+    {episode: 5, start: '1994-07-01', content: 'NASA Beowulf', detail: 'NASA Beowulf 병렬연산을 가능하게 multi computer architecture'},
+    {episode: 5, start: '1998-01-01', content: 'DEC 매각', detail: 'COMPAQ 이 서버 사업부 인수, 삼성이 CPU 사업부 인수'},
+    {episode: 5, start: '1981-01-01', content: 'MS-DOS', detail: 'MS-DOS 출시'},
+    {episode: 5, start: '1983-01-19', content: 'Apple Lisa', detail: 'Apple Lisa 에 GUI 탑재'},
+    {episode: 5, start: '1983-01-01', content: 'Novell NetWare', detail: 'Novell NetWare(Network OS)'},
+    {episode: 5, start: '1984-06-01', content: 'X Window', detail: 'X Window(X11) 초기모델 개발'},
+    {episode: 5, start: '1987-01-01', content: 'OS/2 1.0', detail: 'IBM, MS OS/2 1.0'},
+    {episode: 5, start: '1989-01-01', content: 'SCO Unix', detail: 'SCO Unix'},
+    {episode: 5, start: '1989-09-18', content: 'NeXT NeXTSTEP', detail: 'NeXT NeXTSTEP(OOP 언어를 이용한 OS) 후에 OSX 이 됨'},
+    {episode: 5, start: '1990-05-22', content: 'Windows 3.0', detail: 'MS Windows 3.0'},
+    {episode: 5, start: '1991-09-17', content: 'Linux', detail: '리누스 토발즈 kernel v0.0.1'},
+    {episode: 5, start: '1991-01-01', content: 'BeOS', detail: 'BeOS'},
+    {episode: 5, start: '1992-04-06', content: 'Windows 3.1', detail: 'MS Windows 3.1'},
+    {episode: 5, start: '1992-01-01', content: 'SUN Solaris', detail: 'SUN Solaris'},
+    {episode: 5, start: '1993-07-27', content: 'Windows NT', detail: 'MS Windows NT(New Technology) 3.1, 서버용이라고 홍보함'},
+    {episode: 5, start: '1994-01-01', content: 'dpkg', detail: 'dpkg(Debian Package)'},
+    {episode: 5, start: '1994-01-01', content: 'ports', detail: 'ports(FreeBSD)'},
+    {episode: 5, start: '1995-08-24', content: 'Windows 95', detail: 'MS Windows 95'},
+    {episode: 5, start: '1996-08-24', content: 'Windows NT 4.0', detail: 'MS Windows NT 4.0'},
+    {episode: 5, start: '1997-01-01', content: 'rpm', detail: 'rpm(Redhat Package Management)'},
+    {episode: 5, start: '1998-03-18', content: 'Windows 98', detail: 'MS Windows 98'},
+    {episode: 5, start: '2000-02-17', content: 'Windows 2000', detail: 'MS Windows 2000(NT 5.0)'},
+    {episode: 5, start: '2000-06-19', content: 'Windows ME', detail: 'MS Windows ME(Millennium Edition)'},
+    {episode: 5, start: '2001-08-24', content: 'Windows XP(NT 5.1)', detail: 'MS Windows XP (NT 5.1), 이후 나오는 OS 모두 NT 계열'},
+    // 6화
+    {episode: 6, start: '1962-01-01', content: '상용모뎀', detail: '벨 연구소, 상용모뎀 300bps, 1200bps'},
+    {episode: 6, start: '1973-05-22', content: 'LAN, ethernet', detail: 'xerox parc 팔로알토 연구소 맥칼프 LAN, ethernet'},
+    {episode: 6, start: '1974-01-01', content: 'TCP/IP', detail: '미국방성 TCP/IP 개념 확정, 2005년 대통령 훈장'},
+    {episode: 6, start: '1977-01-01', content: '개인용 MODEM', detail: '개인용 300bps modem 출시됨'},
+    {episode: 6, start: '1977-06-16', content: 'Oracle', detail: 'Oracle 설립'},
+    {episode: 6, start: '1979-01-01', content: 'dBASE', detail: '웨인 래틀리프 dBASE'},
+    {episode: 6, start: '1989-01-01', content: 'WWW', detail: 'CERN 팀 버너스리, WWW'},
+    {episode: 6, start: '1994-01-01', content: 'IPv6', detail: 'IPv6(340간 개의 ip)'},
+    {episode: 6, start: '1972-01-01', content: 'SQL', detail: '1970년대초 SQL 고안'},
+    {episode: 6, start: '1989-01-01', content: 'MS SQL Server', detail: 'MS SQL Server'},
+    {episode: 6, start: '1995-05-23', content: 'MySQL', detail: 'MySQL, web 의 발전에 힘입어 빠르게 발전함'},
+    {episode: 6, start: '2008-01-17', content: 'SUN MySQL', detail: 'SUN MySQL 인수'},
+    {episode: 6, start: '2009-01-22', content: 'MariaDB', detail: 'MariaDB'},
+    {episode: 6, start: '2010-01-27', content: 'Oracle SUN', detail: 'Oracle SUN 인수'},
+    {episode: 6, start: '1993-01-23', content: 'Mosaic', detail: 'NCSA Mosaic'},
+    {episode: 6, start: '1994-01-01', content: 'Yahoo', detail: 'Yahoo(카테고리 서비스) 설립'},
+    {episode: 6, start: '1994-04-04', content: 'Netscape', detail: 'Netscape 설립, Mosaic 인수'},
+    {episode: 6, start: '1994-05-01', content: 'Lycos', detail: 'Lycos(인터넷 검색) 설립'},
+    {episode: 6, start: '1995-08-16', content: 'Internet Explorer', detail: 'MS Internet Explorer'},
+    {episode: 6, start: '1995-12-15', content: 'Altavista', detail: 'Altavista(인터넷 검색) 출시'},
+    {episode: 6, start: '1996-01-01', content: '까치네', detail: '김성훈 까치네'},
+    {episode: 6, start: '1998-09-04', content: 'Google', detail: 'Stanford 컴퓨터공학 래리 페이지, 세르게이 브린 Google(인터넷 검색)'},
+    {episode: 6, start: '2002-09-23', content: 'Firefox', detail: 'Netscape 일부 개발자들 Mozilla 설립 후 Firefox'},
+    {episode: 6, start: '2008-09-02', content: 'Google Chrome', detail: 'Google Chrome'},
+    // 7화
+    {episode: 7, start: '1958-10-18', content: 'Tennis for Two', detail: 'Tennis for Two(오실로스코프로 하는 핑퐁)'},
+    {episode: 7, start: '1962-02-14', content: '스페이스 워', detail: 'MIT 스티브 러셀, 게임을 만들 수 있을듯 생각만 하고 안하다가 만든것이 스페이스 워'},
+    {episode: 7, start: '1972-01-01', content: 'ATARI', detail: '놀런 부쉬넬, 아타리(최초의 게임회사) 설립'},
+    {episode: 7, start: '1974-12-25', content: 'Home Pong', detail: 'ATARI Home Pong'},
+    {episode: 7, start: '1976-01-01', content: '반다이', detail: '반다이 게임 진출'},
+    {episode: 7, start: '1976-01-01', content: '닌텐도', detail: '닌텐도 게임 진출'},
+    {episode: 7, start: '1976-11-01', content: '채널F', detail: '채널F 최초의 멀티 카트리지 콘솔게임'},
+    {episode: 7, start: '1977-10-01', content: 'VCS', detail: 'ATARI VCS'},
+    {episode: 7, start: '1978-01-01', content: 'Space Invaders', detail: 'TAITO(게임회사) Space Invaders'},
+    {episode: 7, start: '1979-01-01', content: 'Galaxian', detail: 'NAMCO Galaxian'},
+    {episode: 7, start: '1980-05-22', content: 'Pac-Man', detail: 'NAMCO Pac-Man'},
+    {episode: 7, start: '1980-11-01', content: 'Rally-X', detail: 'NAMCO Rally-X'},
+    {episode: 7, start: '1981-01-01', content: 'Donkey Kong', detail: '닌텐도 미야모토 시게루 Donkey Kong'},
+    {episode: 7, start: '1982-01-01', content: '마리오', detail: '미야모토 시게루 점프맨에 이름 지어줌'},
+    {episode: 7, start: '1986-02-21', content: '젤다의 전설', detail: '미야모토 시게루 젤다의 전설'},
+    // 8화
+    {episode: 8, start: '1982-03-16', content: 'Pac-Man', detail: 'ATARI Pac-Man'},
+    {episode: 8, start: '1982-12-24', content: 'E.T.', detail: 'ATARI E.T.'},
+    {episode: 8, start: '1983-01-01', end: '1985-10-01', content: 'Atari Shock', detail: 'Atari Shock', type: 'background'},
+    {episode: 8, start: '1983-07-14', content: '마리오브라더스', detail: '닌텐도 마리오브라더스'},
+    {episode: 8, start: '1983-07-15', content: 'Famicom', detail: '닌텐도 패미컴'},
+    {episode: 8, start: '1983-01-01', content: 'SG-1000', detail: 'SEGA(SErvice GAmes) 8비트 가정용 게임기 SG-1000 발매'},
+    {episode: 8, start: '1984-01-01', content: 'ATARI', detail: '아케이드 사업부 매각'},
+    {episode: 8, start: '1987-01-01', content: '닌텐도', detail: 'PC Engine, cdrom 이 콘솔에 최초탑재'},
+    {episode: 8, start: '1987-08-30', content: 'Street Fighter', detail: 'CAPCOM 스트리트 파이터'},
+    {episode: 8, start: '1988-01-01', content: 'SEGA', detail: 'SEGA mega drive'},
+    {episode: 8, start: '1988-10-23', content: 'Super Mario Bros. 3', detail: '닌텐도 슈퍼마리오3'},
+    {episode: 8, start: '1989-04-21', content: 'GAME BOY', detail: '닌텐도 게임보이 발매'},
+    {episode: 8, start: '1990-04-26', content: 'SNK', detail: 'NEO-GEO, 이름의 의미는 새로운(NEO) 땅(GEO)'},
+    {episode: 8, start: '1990-11-21', content: 'Super Famicom', detail: '닌텐도 슈퍼패미컴 발매'},
+    {episode: 8, start: '1990-12-03', content: 'Sonic', detail: 'SNK, SEGA 공동 개발, 소닉(Sonic the Hedgehog Pocket Adventure)'},
+    {episode: 8, start: '1993-10-01', content: 'Virtua Fighter', detail: 'SEGA 버추어 파이터'},
+    {episode: 8, start: '1994-11-22', content: 'SEGA Saturn', detail: 'SEGA Saturn 킬링타이틀 버추어파이터, 32비트 그래픽 칩'},
+    {episode: 8, start: '1994-12-03', content: 'PS1', detail: 'SONY PlayStation 1'},
+    {episode: 8, start: '1996-02-01', content: 'Pokemon', detail: '닌텐도 포켓몬'},
+    {episode: 8, start: '1998-09-26', content: 'DDR', detail: 'Dance Dance Revolution, 체감형 아케이드'},
+    {episode: 8, start: '1998-11-27', content: 'SEGA Dreamcast', detail: 'SEGA Dreamcast, 128비트 그래픽 칩, 최초 온라인 지원'},
+    {episode: 8, start: '1999-09-01', content: 'Pump It Up', detail: 'Pump It Up, 체감형 아케이드'},
+    {episode: 8, start: '2000-03-04', content: 'PS2', detail: 'SONY PlayStation 2, DVD, 약간 개조하면 linux 설치가능'},
+    {episode: 8, start: '2001-09-14', content: 'GameCube', detail: '닌텐도 GameCube'},
+    {episode: 8, start: '2001-11-15', content: 'Xbox', detail: 'MS Xbox, Pentium3 733MHz, Windows2000 Custom, 블루스크린 대신 그린스크린'},
+    {episode: 8, start: '2004-11-21', content: 'NDS', detail: '닌텐도 DS'},
+    {episode: 8, start: '2004-12-12', content: 'PSP', detail: 'SONY PlayStation Portable'},
+    {episode: 8, start: '2005-11-22', content: 'Xbox 360', detail: 'MS Xbox 360, 그린스크린 대신 red ring of death'},
+    {episode: 8, start: '2006-11-11', content: 'PS3', detail: 'SONY PS3'},
+    {episode: 8, start: '2006-11-19', content: '닌텐도 Wii', detail: '닌텐도 Wii, GameCube overclock, 새로운 입력기기의 혁신이라 칭함, gyro sensor 가 게임에 들어감, 써드파티 없이 first 파티로 유지되다 오래 못감'},
+    {episode: 8, start: '2011-02-24', content: '닌텐도 3DS', detail: '닌텐도 3DS'},
+    {episode: 8, start: '2011-12-17', content: 'PS Vita', detail: 'SONY PlayStation Vita'},
+    {episode: 8, start: '2012-11-18', content: '닌텐도 Wii U', detail: '닌텐도 Wii U'},
+    {episode: 8, start: '2013-11-15', content: 'PS4', detail: 'SONY PS4'},
+    {episode: 8, start: '2013-11-22', content: 'Xbox ONE', detail: 'MS Xbox ONE'},
+    // 9화
+    {episode: 9, start: '1983-01-01', end: '1985-10-01', content: 'Atari Shock', detail: 'Atari Shock', type: 'background'},
+    {episode: 9, start: '1961-01-01', content: 'BS project', detail: '컴퓨터 체스 게임'},
+    {episode: 9, start: '1967-01-01', content: '체크 우승', detail: '인공지능 체스 게임이 처음으로 사람을 이김'},
+    {episode: 9, start: '1977-01-01', content: 'Commodore PET', detail: 'Commodore PET'},
+    {episode: 9, start: '1977-04-01', content: 'Apple II', detail: 'Apple II 출시, 5년 후 매출 10억$ 달성'},
+    // Adventure
+    {episode: 9, start: '1976-01-01', content: 'Cave Adventure', detail: 'Colossal Cave Adventure, text 기반'},
+    {episode: 9, start: '1979-01-01', content: 'Sierra Entertainment', detail: 'Sierra Entertainment, Colossal Cave 게임하던 부부가 설립한 회사, 아내 로버타 윌리엄스 게임작가, 남편 켄 윌리엄스 프로그래머, 미스테리 하우스(그래픽을 입힘), 킹스 퀘스트, 래리 시리즈(성인 게임)'},
+    {episode: 9, start: '1982-05-01', content: 'Lucasarts', detail: '조지 루카스, 루카스 아츠 설립'},
+    {episode: 9, start: '1990-01-01', content: 'Loom', detail: '루카스 아츠, 룸'},
+    {episode: 9, start: '1990-10-01', content: 'The Secret of Monkey Island', detail: '루카스 아츠, 원숭이 섬의 비밀'},
+    {episode: 9, start: '1992-06-01', content: 'Indiana Jones and the Fate of Atlantis', detail: '루카스 아츠, 인디애나 존스'},
+    {episode: 9, start: '1993-09-24', content: 'Myst', detail: 'adventure 장르 마지막 명작'},
+    {episode: 9, start: '1995-01-01', content: 'CDROM', detail: 'cdrom 보급으로 동영상, 사운드가 게임에 들어감, 그래픽 카드, 사운드 카드가 보급됨, 압축 알고리즘은 나오기 전(mp3 없음, wav 뿐이기 때문에 74분)'},
+    {episode: 9, start: '1998-01-01', content: '시에라 설립자 부부 은퇴', detail: '시에라 설립자 부부 은퇴 후 몰락'},
+    // RPG(Role Playing Game)
+    {episode: 9, start: '1981-01-01', content: 'Wizardry', detail: 'SirTech Wizardry, 1인칭'},
+    {episode: 9, start: '1981-01-01', content: 'Ultima', detail: 'Ultima(1인칭)'},
+    {episode: 9, start: '1986-01-01', content: 'Might and Magic', detail: '마이트 앤 매직'},
+    {episode: 9, start: '1986-05-27', content: 'Dragon Quest', detail: '드래곤퀘스트'},
+    {episode: 9, start: '1987-12-18', content: 'Final Fantasy', detail: '파이널 판타지'},
+    {episode: 9, start: '1997-11-24', content: 'Diablo', detail: '시에라 디아블로'},
+    {episode: 9, start: '1998-04-30', content: 'Might and Magic VI', detail: '마이트 앤 매직 6, 왈도체, 발번역으로 유명함, 스타2, 디아3 아직도 이런 요소들이 있음, 한국에 신문화를 들여오는 일이 얼마나 어려웠는지'},
+    {episode: 9, start: '2000-06-29', content: 'Diablo II', detail: '블리자드 디아블로2'},
+    // 스포츠, 레이싱 게임
+    {episode: 9, start: '1982-11-01', content: 'Flight Simulator', detail: 'Microsoft Flight Simulator'},
+    {episode: 9, start: '1982-05-27', content: 'EA', detail: 'EA(Electronic Arts) 설립'},
+    {episode: 9, start: '1988-06-01', content: '매든 NFL', detail: 'EA 매든 NFL'},
+    {episode: 9, start: '1989-01-01', content: 'NBA', detail: 'EA Lakers versus Celtics and the NBA Playoffs'},
+    {episode: 9, start: '1994-08-31', content: 'The Need for Speed', detail: 'EA The Need for Speed'},
+    {episode: 9, start: '1995-07-01', content: '위닝 일레븐', detail: '코나미 위닝 일레븐'},
+    {episode: 9, start: '1997-12-23', content: '그란 투리스모', detail: '폴리포니 그란 투리스모'},
+    {episode: 9, start: '2004-11-05', content: 'FM', detail: 'SEGA Football Manager'},
+    // 슈팅게임, FPS, TPS
+    {episode: 9, start: '1981-01-01', content: '울펜슈타인', detail: '이드소프트 울펜슈타인'},
+    {episode: 9, start: '1992-05-05', content: '울펜슈타인 3D', detail: '이드소프트 울펜슈타인 3D'},
+    {episode: 9, start: '1993-12-10', content: '둠', detail: '이드소프트 둠'},
+    {episode: 9, start: '1994-01-01', content: '미국 오락 소프트웨어 등급 위원회', detail: '미국 오락 소프트웨어 등급 위원회 창설'},
+    {episode: 9, start: '1995-01-01', content: '1945', detail: '사이쿄(Psikyo), 스트라이커즈 1945'},
+    {episode: 9, start: '1996-06-22', content: '퀘이크', detail: '이드소프트 퀘이크, 게임엔진을 남김, Unreal Engine'},
+    // 전략게임
+    {episode: 9, start: '1985-01-01', content: '삼국지', detail: 'Koei 삼국지'},
+    {episode: 9, start: '1991-01-01', content: '문명', detail: '시드 마이어 문명, 갓(God)게임'},
+    {episode: 9, start: '1992-01-01', content: 'Dune II', detail: 'WestWood Dune II, RTS(RealTime Simulation) 의 시초'},
+    {episode: 9, start: '1994-01-01', content: 'Panzer General', detail: 'SSI(Strategic Simulations Inc.) Panzer General'},
+    {episode: 9, start: '1995-01-01', content: 'Command & Conquer', detail: 'WestWood Command & Conquer(C&C, CNC)'},
+    {episode: 9, start: '1998-03-01', content: 'StarCraft', detail: '블리자드 StarCraft'},
+    // OpenWorld 게임
+    {episode: 9, start: '1989-02-01', content: '심시티', detail: '맥시스 심시티'},
+    {episode: 9, start: '1997-10-21', content: 'GTA', detail: '록스타 GTA'},
+    {episode: 9, start: '2000-02-04', content: '심즈', detail: '맥시스 심즈'},
+    {episode: 9, start: '2011-11-18', content: 'Minecraft', detail: 'Minecraft'},
+    // 10화
+    // 온라인 게임
+    {episode: 10, start: '1996-04-05', content: '바람의 나라', detail: '바람의 나라(MUG 로 봐야 함)'},
+    {episode: 10, start: '1997-09-24', content: '울티마 온라인', detail: '울티마 온라인, 집을 짓고 전쟁하고 빈집털이하고 경비병 뽑고 도시가 생기고 부동산 파동이 생기고..'},
+    {episode: 10, start: '1998-09-01', content: '리니지1', detail: 'NC 리니지1'},
+    {episode: 10, start: '1999-03-16', content: '에버퀘스트', detail: '소니 미국 지사 에버퀘스트, 현재 우리가 아는 mmorpg 의 모든 개념이 시작'},
+    {episode: 10, start: '2001-10-09', content: '다크 에이지 오브 카멜롯', detail: '다크 에이지 오브 카멜롯, 에버퀘스트에 이어서 mmorpg 개념이 완성됨, 레이드, 어그로, RVR(Realm Versus Realm)'},
+    {episode: 10, start: '2002-07-03', content: 'WarCraft3', detail: 'Blizzard WarCraft3, 맵 제작 엔진 공개, 타워디펜스, AOS(Aeon of Strife), 서사의 확장'},
+    {episode: 10, start: '2003-09-12', content: 'Steam', detail: 'Steam 패키지 게임 스토어'},
+    {episode: 10, start: '2003-10-01', content: '리니지2', detail: 'NC 리니지2'},
+    {episode: 10, start: '2004-11-23', content: 'World of Warcraft', detail: 'Blizzard World of Warcraft(WoW)'},
+    {episode: 10, start: '2004-06-01', end: '2008-03-01', content: '리니지2 바츠 해방 전쟁', detail: '20만명 참여<br>기득권의 통제<br>다른 사람들 반기<br>다른 서버 사람들도 접속<br>만국의 쪼렙이 단결해 내복단 결성<br>승리<br>승리 후 혁명군 주축 혈맹이 기득권층을 닮아 다시 통제함'},
+    {episode: 10, start: '2009-10-27', content: 'League of Legend', detail: '라이엇 League of Legend(LoL)'},
+    {episode: 10, start: '2010-07-27', content: 'StarCraft2', detail: 'Blizzard StarCraft2'},
+    // 게임의 폭력성 문제
+    {episode: 10, start: '2003-07-21', content: '아침마당 임요환 출연', detail: '아침마당 임요환 출연, 게임중독자 취급'},
+    {episode: 10, start: '2011-02-13', content: 'MBC PC방 전원차단', detail: '적은 표본의 오류, 증권가에서도 했어야 하는데'}
+  ];
+
+  // Create a DataSet (allows two way data-binding)
+  const dataSet = new vis.DataSet(items.map((item, i, allItems) => {
+    item.className = `color-episode-${item.episode}`;
+    item.title = `${item.start}${item.end ? `~${item.end}` : ''}<br>${item.detail}`;
+    item.group = item.episode;
+    return item;
+  }));
+
+  // const groups = new vis.DataSet([
+  //   {id: 'bar', content: 'bar', subgroupVisibility: {sg_1: true, sg_2: true, sg_3: true}},
+  //   {id: 'foo', content: 'foo'}
+  // ]);
+  const groups = new vis.DataSet(episodeTitles.map((item, i, allItems) => ({id: i + 1, content: item})));
+
+  // Configuration for the Timeline
+  const options = {};
+
+  function toggleVisible(rectOrText) {
+    const episode = parseInt(rectOrText.dataset.episode);
+    const rectStyle = document.getElementById(`episode-rect-${episode}`).style;
+    const [r, g, b, a] = rectStyle.fill.substring(5, rectStyle.fill.length - 1).split(/,\s*/);
+    const newAlpha = a === '0.99' ? '0.11' : '0.99';
+    rectStyle.fill = `rgba(${r}, ${g}, ${b}, ${newAlpha})`;// value 의 끝에 ; 있으면 안됨
+    groups.update({id: episode, visible: (newAlpha === '0.99')});
+  }
+
+  // Create a Timeline
+  const timeline = new vis.Timeline(container, dataSet, groups, options);
+</script>
+</body>
+</html>

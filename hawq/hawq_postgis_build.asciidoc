@@ -1,0 +1,585 @@
+= PostGIS for Apache HAWQ
+김하늘 hskimsky@gmail.com
+:source-highlighter: coderay
+
+== 목표와 전제조건
+
+Apache HAWQ 에서 실행 가능 한 PostGIS 를 설치합니다. +
+build, install 하는 순서와 명령어를 아주 자세하게 적어놓았습니다. +
+Apache HAWQ 는 이미 설치되어 있다고 가정합니다. +
+Apache HAWQ build 방법은 https://github.com/HaNeul-Kim/apache-hawq-build/blob/master/hawq_build.asciidoc[여기]를 참고합니다. +
+먼저 챕터별 전체 실행 스크립트를 적어놓았고 그 뒤에 부분별 실행 스크립트를 적어놓았고 그 다음에 실행 한 결과 로그를 적어놓았습니다. +
+문서는 asciidoc 으로 작성하였으며 https://github.com/HaNeul-Kim/apache-hawq-build[repository] 내에 https://raw.githubusercontent.com/HaNeul-Kim/apache-hawq-build/master/postgis_for_hawq_build.asciidoc[asciidoc 파일] 및 https://github.com/HaNeul-Kim/apache-hawq-build/raw/master/postgis_for_hawq_build.pdf[pdf 파일]도 포함되어 있습니다. +
+잘못된 점이 있으면 hskimsky@gmail.com 으로 메일 주시기 바랍니다. +
+빌드 성공을 기원합니다.
+
+== System 구성
+
+Linux, Python, JAVA, Maven, Hadoop 은 미리 설치되어 있다고 가정합니다.
+
+Hadoop 의 super user 는 root 가 아니어야 합니다.
+
+왜냐하면 HAWQ 를 root 로 설치할 수 없습니다.
+
+.Machine 구성
+[width="100%",cols="3,7",frame="topbot",options="header"]
+|======================
+|Program |Version
+|Linux   |CentOS 6.7
+|Python  |2.6.6
+|JAVA    |Oracle JDK 1.7.0_80
+|Maven   |Apache Maven 3.3.9
+|Hadoop  |Apache Hadoop 2.7.2
+|HAWQ    |Apache HAWQ 2.0.0.0 dev
+|PXF     |3.0.0
+|======================
+
+.ROLE 구성
+[width="100%",cols="3,7",frame="topbot",options="header"]
+|======================
+|FQDN               |ROLE
+|hawq1.apache.local |Namenode, Secondary Namenode, ResourceManager, HAWQ Standby, PXF
+|hawq2.apache.local |HAWQ Master, PXF
+|hawq3.apache.local |Datanode, HAWQ Segment, PXF
+|hawq4.apache.local |Datanode, HAWQ Segment, PXF
+|======================
+
+.PORT 구성
+[width="100%",cols="3,7",frame="topbot",options="header"]
+|======================
+|ROLE                      |PORT
+|Namenode                  |8020
+|ResourceManager           |8050
+|ResourceManager Scheduler |8030
+|HAWQ Master               |5432
+|PXF                       |51200
+|======================
+
+== PostGIS for Apache HAWQ install
+
+=== PostGIS for Apache HAWQ build
+
+HAWQ 가 설치 된 모든 서버(master, standby, segment)에서 작업해야 합니다. +
+이제 작업은 특별한 지침이 없으면 모두 hawq user(이 문서에서는 hskimsky) 로 작업합니다.
+
+[source,bash]
+----
+sudo yum install gdal gdal-devel geos geos-devel proj proj-devel libxml2-devel byacc bison libxslt ImageMagick -y
+mkdir -p ~/Downloads/hawqgis
+cd ~/Downloads/hawqgis
+git clone https://github.com/kdunn926/incubator-hawq
+cd ~/Downloads/hawqgis/incubator-hawq/contrib/postgis/
+export CFLAGS="-I/usr/local/hawq/default/include -I/usr/local/hawq/default/include/postgresql/server"
+export CXXFLAGS=${CFLAGS}
+export PG_CFLAGS=${CFLAGS}
+export PG_CPPFLAGS=${CFLAGS}
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/lib64:/usr/lib64:/usr/local/hawq/default/lib
+./configure --prefix=/usr/local/hawq/default --with-pgconfig=/usr/local/hawq/default/bin/pg_config --with-python --with-perl
+sudo make -j8
+sudo make -j8
+cd postgis
+/usr/bin/perl ../utils/postgis_proc_upgrade.pl postgis_upgrade_20_minor.sql.in 2.0 > postgis_upgrade_20_minor.sql
+cd ..
+sudo make -j8
+sudo make install
+sudo chown -R hskimsky:hskimsky /usr/local/hawq/default
+----
+
+
+==== PostGIS build dependencies
+
+[source,bash]
+----
+sudo yum install gdal gdal-devel geos geos-devel proj proj-devel libxml2-devel byacc bison libxslt ImageMagick -y
+----
+
+[source,log]
+----
+[hskimsky@hawq1 ~]$ sudo yum install gdal gdal-devel geos geos-devel proj proj-devel libxml2-devel byacc bison libxslt ImageMagick -y
+Loaded plugins: fastestmirror, refresh-packagekit, security
+Setting up Install Process
+Loading mirror speeds from cached hostfile
+ * base: mirror.premi.st
+ * epel: mirror.premi.st
+ * extras: mirror.premi.st
+ * updates: mirror.premi.st
+Package byacc-1.9.20070509-7.el6.x86_64 already installed and latest version
+Package bison-2.4.1-5.el6.x86_64 already installed and latest version
+Package libxslt-1.1.26-2.el6_3.1.x86_64 already installed and latest version
+Resolving Dependencies
+--> Running transaction check
+---> Package ImageMagick.x86_64 0:6.7.2.7-5.el6_8 will be installed
+--> Processing Dependency: libwmflite-0.2.so.7()(64bit) for package: ImageMagick-6.7.2.7-5.el6_8.x86_64
+--> Processing Dependency: libwmf-0.2.so.7()(64bit) for package: ImageMagick-6.7.2.7-5.el6_8.x86_64
+--> Processing Dependency: libImath.so.6()(64bit) for package: ImageMagick-6.7.2.7-5.el6_8.x86_64
+--> Processing Dependency: libIlmThread.so.6()(64bit) for package: ImageMagick-6.7.2.7-5.el6_8.x86_64
+--> Processing Dependency: libIlmImf.so.6()(64bit) for package: ImageMagick-6.7.2.7-5.el6_8.x86_64
+--> Processing Dependency: libIex.so.6()(64bit) for package: ImageMagick-6.7.2.7-5.el6_8.x86_64
+--> Processing Dependency: libHalf.so.6()(64bit) for package: ImageMagick-6.7.2.7-5.el6_8.x86_64
+---> Package gdal.x86_64 0:1.7.3-15.el6 will be installed
+--> Processing Dependency: libxerces-c-3.0.so()(64bit) for package: gdal-1.7.3-15.el6.x86_64
+--> Processing Dependency: librx.so.0()(64bit) for package: gdal-1.7.3-15.el6.x86_64
+--> Processing Dependency: libpq.so.5()(64bit) for package: gdal-1.7.3-15.el6.x86_64
+--> Processing Dependency: libogdi.so.3()(64bit) for package: gdal-1.7.3-15.el6.x86_64
+--> Processing Dependency: libodbcinst.so.2()(64bit) for package: gdal-1.7.3-15.el6.x86_64
+...생략
+Installed:
+  ImageMagick.x86_64 0:6.7.2.7-5.el6_8         gdal.x86_64 0:1.7.3-15.el6         gdal-devel.x86_64 0:1.7.3-15.el6         geos.x86_64 0:3.3.2-1.el6
+  geos-devel.x86_64 0:3.3.2-1.el6              proj.x86_64 0:4.7.0-1.el6          proj-devel.x86_64 0:4.7.0-1.el6
+
+Dependency Installed:
+  OpenEXR-libs.x86_64 0:1.6.1-8.1.el6                cfitsio.x86_64 0:3.240-3.el6                                gdal-java.x86_64 0:1.7.3-15.el6
+  giflib.x86_64 0:4.1.6-3.1.el6                      hdf5.x86_64 0:1.8.5.patch1-9.el6                            ilmbase.x86_64 0:1.0.1-6.1.el6
+  java-1.8.0-openjdk.x86_64 1:1.8.0.91-1.b14.el6     java-1.8.0-openjdk-headless.x86_64 1:1.8.0.91-1.b14.el6     jpackage-utils.noarch 0:1.7.5-3.16.el6
+  libdap.x86_64 0:3.11.0-1.el6                       libgeotiff.x86_64 0:1.2.5-6.el6                             libgeotiff-devel.x86_64 0:1.2.5-6.el6
+  librx.x86_64 0:1.5-24.el6                          libtiff-devel.x86_64 0:3.9.4-10.el6_5                       libwmf.x86_64 0:0.2.8.4-25.el6_7
+  libwmf-lite.x86_64 0:0.2.8.4-25.el6_7              netcdf.x86_64 0:4.1.1-3.el6.5                               ogdi.x86_64 0:3.2.0-0.14.beta2.el6
+  postgresql-libs.x86_64 0:8.4.20-6.el6              ttmkfdir.x86_64 0:3.0.9-32.1.el6                            tzdata-java.noarch 0:2016f-1.el6
+  unixODBC.x86_64 0:2.2.14-14.el6                    xerces-c.x86_64 0:3.0.1-20.el6                              xorg-x11-fonts-Type1.noarch 0:7.2-11.el6
+
+Updated:
+  libxml2-devel.x86_64 0:2.7.6-21.el6_8.1
+
+Dependency Updated:
+  libxml2.x86_64 0:2.7.6-21.el6_8.1                                         libxml2-python.x86_64 0:2.7.6-21.el6_8.1
+
+Complete!
+[hskimsky@hawq1 ~]$
+----
+
+==== PostGIS for Apache HAWQ download
+
+[source,bash]
+----
+mkdir -p ~/Downloads/hawqgis
+cd ~/Downloads/hawqgis
+git clone https://github.com/kdunn926/incubator-hawq
+----
+
+[source,log]
+----
+[hskimsky@hawq1 ~]$ mkdir -p ~/Downloads/hawqgis
+[hskimsky@hawq1 ~]$ cd ~/Downloads/hawqgis
+[hskimsky@hawq1 hawqgis]$ git clone https://github.com/kdunn926/incubator-hawq
+Initialized empty Git repository in /home/hskimsky/incubator-hawq/.git/
+remote: Counting objects: 25228, done.
+remote: Total 25228 (delta 0), reused 0 (delta 0), pack-reused 25228
+Receiving objects: 100% (25228/25228), 66.83 MiB | 2.59 MiB/s, done.
+Resolving deltas: 100% (11443/11443), done.
+[hskimsky@hawq1 hawqgis]$
+----
+
+==== PostGIS for Apache HAWQ build
+
+두번 `make -j8` 명령 실행 시 까지는 error 가 발생하는데 이후 명령어들을 실행 후 재실행하면 제대로 빌드가 가능해집니다.
+
+[source,bash]
+----
+cd ~/Downloads/hawqgis/incubator-hawq/contrib/postgis/
+export CFLAGS="-I/usr/local/hawq/default/include -I/usr/local/hawq/default/include/postgresql/server"
+export CXXFLAGS=${CFLAGS}
+export PG_CFLAGS=${CFLAGS}
+export PG_CPPFLAGS=${CFLAGS}
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/lib64:/usr/lib64:/usr/local/hawq/default/lib
+./configure --prefix=/usr/local/hawq/default --with-pgconfig=/usr/local/hawq/default/bin/pg_config --with-python --with-perl
+sudo make -j8
+sudo make -j8
+cd postgis
+/usr/bin/perl ../utils/postgis_proc_upgrade.pl postgis_upgrade_20_minor.sql.in 2.0 > postgis_upgrade_20_minor.sql
+cd ..
+sudo make -j8
+----
+
+===== 첫 번째 make -j8
+
+[source,bash]
+----
+cd ~/Downloads/hawqgis/incubator-hawq/contrib/postgis/
+export CFLAGS="-I/usr/local/hawq/default/include -I/usr/local/hawq/default/include/postgresql/server"
+export CXXFLAGS=${CFLAGS}
+export PG_CFLAGS=${CFLAGS}
+export PG_CPPFLAGS=${CFLAGS}
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/lib64:/usr/lib64:/usr/local/hawq/default/lib
+./configure --prefix=/usr/local/hawq/default --with-pgconfig=/usr/local/hawq/default/bin/pg_config --with-python --with-perl
+sudo make -j8
+----
+
+[source,log]
+----
+[hskimsky@hawq1 postgis]$ cd ~/Downloads/hawqgis/incubator-hawq/contrib/postgis/
+[hskimsky@hawq1 postgis]$ export CFLAGS="-I/usr/local/hawq/default/include -I/usr/local/hawq/default/include/postgresql/server"
+[hskimsky@hawq1 postgis]$ export CXXFLAGS=${CFLAGS}
+[hskimsky@hawq1 postgis]$ export PG_CFLAGS=${CFLAGS}
+[hskimsky@hawq1 postgis]$ export PG_CPPFLAGS=${CFLAGS}
+[hskimsky@hawq1 postgis]$ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/lib64:/usr/lib64:/usr/local/hawq/default/lib
+[hskimsky@hawq1 postgis]$ ./configure --prefix=/usr/local/hawq/default --with-pgconfig=/usr/local/hawq/default/bin/pg_config --with-python --with-perl
+configure: WARNING: unrecognized options: --with-python, --with-perl
+checking build system type... x86_64-unknown-linux-gnu
+checking host system type... x86_64-unknown-linux-gnu
+checking how to print strings... printf
+checking for gcc... gcc
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables...
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+...생략
+------------------------------------------------------------------------
+  WARNING: You have set the --prefix to '/usr/local/hawq/default'. But we mostly
+  ignore the --prefix. For your info, using the values determined from
+  /usr/local/hawq/default/bin/pg_config we will be installing:
+    * postgis shared library in /usr/local/hawq/default/lib
+    * postgis SQL files in /usr/local/hawq/default/share/postgresql/contrib/postgis-2.0
+    * postgis executables in /usr/local/hawq/default/bin
+------------------------------------------------------------------------
+...생략
+configure: WARNING: unrecognized options: --with-python, --with-perl
+
+  PostGIS is now configured for x86_64-unknown-linux-gnu
+
+ -------------- Compiler Info -------------
+  C compiler:           gcc -I/usr/local/hawq/default/include -I/usr/local/hawq/default/include/postgresql/server
+  C++ compiler:         g++ -I/usr/local/hawq/default/include -I/usr/local/hawq/default/include/postgresql/server
+  SQL preprocessor:     /opt/rh/devtoolset-2/root/usr/bin/cpp -traditional-cpp -P
+
+ -------------- Dependencies --------------
+  GEOS config:          /usr/bin/geos-config
+  GEOS version:         3.3.2
+  GDAL config:          /usr/bin/gdal-config
+  GDAL version:         1.7.3
+  PostgreSQL config:    /usr/local/hawq/default/bin/pg_config
+  PostgreSQL version:   PostgreSQL 8.2.15
+  PROJ4 version:        47
+  Libxml2 config:       /usr/bin/xml2-config
+  Libxml2 version:      2.7.6
+  JSON-C support:       yes
+  PostGIS debug level:  0
+  Perl:                 /usr/bin/perl
+
+ --------------- Extensions ---------------
+  PostGIS Raster:       enabled
+  PostGIS Topology:     enabled
+
+ -------- Documentation Generation --------
+  xsltproc:             /usr/bin/xsltproc
+  xsl style sheets:
+  dblatex:
+  convert:              /usr/bin/convert
+  mathml2.dtd:          http://www.w3.org/Math/DTD/mathml2/mathml2.dtd
+
+[hskimsky@hawq1 postgis]$
+----
+
+[source, bash]
+----
+sudo make -j8
+----
+
+[source,log]
+----
+[hskimsky@hawq1 postgis]$ sudo make -j8
+  for s in doc liblwgeom libpgcommon postgis regress raster topology loader utils ; do \
+  		echo "---- Making all in ${s}"; \
+  		make -C ${s} all || exit 1; \
+  	done;
+  ---- Making all in doc
+  make[1]: Entering directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/doc'
+
+  configure was unable to find the Docbook XSL stylesheet directory
+  which is required to build the documentation.
+  Install the Docbook XSL stylesheets and/or re-run configure
+  with the --with-xsldir option.
+  Alternatively refer to online manual:
+
+    http://postgis.net/documentation
+...생략
+cc1: error: /root/Downloads/hawq/incubator-hawq/depends/libhdfs3/build/install/include: Permission denied
+cc1: error: /root/Downloads/hawq/incubator-hawq/depends/libyarn/build/install/include: Permission denied
+gcc -O3 -std=gnu99  -Wall -Wmissing-prototypes -Wpointer-arith  -Wendif-labels -Wformat-security -fno-strict-aliasing -fwrapv -fno-aggressive-loop-optimizations -I/usr/local/include -I/usr/include/libxml2 -fpic -I/usr/local/hawq/default/include -I/usr/local/hawq/default/include/postgresql/server -I/usr/include   -I/usr/include/libxml2 -I../liblwgeom -I../libpgcommon -I. -I/usr/local/hawq/default/include/postgresql/server -I/usr/local/hawq/default/include/postgresql/internal -D_GNU_SOURCE  -I/root/Downloads/hawq/incubator-hawq/depends/libhdfs3/build/install/include -I/root/Downloads/hawq/incubator-hawq/depends/libyarn/build/install/include  -c -o lwgeom_ogc.o lwgeom_ogc.c
+cc1: error: /root/Downloads/hawq/incubator-hawq/depends/libhdfs3/build/install/include: Permission denied
+cc1: error: /root/Downloads/hawq/incubator-hawq/depends/libyarn/build/install/include: Permission denied
+make[1]: *** [lwgeom_accum.o] Error 1
+make[1]: *** Waiting for unfinished jobs....
+make[1]: *** [postgis_module.o] Error 1
+cc1: error: /root/Downloads/hawq/incubator-hawq/depends/libhdfs3/build/install/include: Permission denied
+cc1: error: /root/Downloads/hawq/incubator-hawq/depends/libyarn/build/install/include: Permission denied
+cc1: error: /root/Downloads/hawq/incubator-hawq/depends/libhdfs3/build/install/include: Permission denied
+cc1: error: /root/Downloads/hawq/incubator-hawq/depends/libyarn/build/install/include: Permission denied
+make[1]: *** [lwgeom_spheroid.o] Error 1
+make[1]: *** [lwgeom_ogc.o] Error 1
+postgis.sql.in.c:21:0: fatal error: pg_config.h: No such file or directory
+ #include "pg_config.h"
+ ^
+compilation terminated.
+make[1]: Leaving directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/postgis'
+make: *** [all] Error 1
+[hskimsky@hawq1 postgis]$
+----
+
+===== 두 번째 make -j8
+
+[source, bash]
+----
+sudo make -j8
+----
+
+[source,log]
+----
+[hskimsky@hawq1 postgis]$ sudo make -j8
+for s in doc liblwgeom libpgcommon postgis regress raster topology loader utils ; do \
+		echo "---- Making all in ${s}"; \
+		make -C ${s} all || exit 1; \
+	done;
+---- Making all in doc
+make[1]: Entering directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/doc'
+
+configure was unable to find the Docbook XSL stylesheet directory
+which is required to build the documentation.
+Install the Docbook XSL stylesheets and/or re-run configure
+with the --with-xsldir option.
+Alternatively refer to online manual:
+
+  http://postgis.net/documentation
+...생략
+Unable to locate target new version number in postgis_upgrade_20_minor.sql.in
+make[1]: *** [postgis_upgrade_20_minor.sql] Error 255
+make[1]: *** Deleting file `postgis_upgrade_20_minor.sql'
+make[1]: *** Waiting for unfinished jobs....
+geography_measurement.c: In function ‘geography_distance’:
+geography_measurement.c:53:9: warning: variable ‘tolerance’ set but not used [-Wunused-but-set-variable]
+  double tolerance;
+         ^
+geography_measurement.c: In function ‘geography_bestsrid’:
+geography_measurement.c:502:13: warning: variable ‘type2’ set but not used [-Wunused-but-set-variable]
+  int type1, type2;
+             ^
+geography_measurement.c:502:6: warning: variable ‘type1’ set but not used [-Wunused-but-set-variable]
+  int type1, type2;
+      ^
+geometry_estimate.c: In function ‘estimate_selectivity’:
+geometry_estimate.c:401:20: warning: variable ‘box_area’ set but not used [-Wunused-but-set-variable]
+  double cell_area, box_area;
+                    ^
+geometry_estimate.c: In function ‘compute_geometry_stats’:
+geometry_estimate.c:799:9: warning: variable ‘cell_area’ set but not used [-Wunused-but-set-variable]
+  double cell_area;
+         ^
+make[1]: Leaving directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/postgis'
+make: *** [all] Error 1
+[hskimsky@hawq1 postgis]$
+----
+
+===== perl 명령어 실행
+
+[source,bash]
+----
+cd postgis
+/usr/bin/perl ../utils/postgis_proc_upgrade.pl postgis_upgrade_20_minor.sql.in 2.0 > postgis_upgrade_20_minor.sql
+cd ..
+----
+
+[source,log]
+----
+[hskimsky@hawq1 postgis]$ cd postgis
+[hskimsky@hawq1 postgis]$ /usr/bin/perl ../utils/postgis_proc_upgrade.pl postgis_upgrade_20_minor.sql.in 2.0 > postgis_upgrade_20_minor.sql
+Unable to locate target new version number in postgis_upgrade_20_minor.sql.in
+[hskimsky@hawq1 postgis]$
+----
+
+===== 세 번째 make -j8
+
+[source,bash]
+----
+sudo make -j8
+----
+
+[source,log]
+----
+[hskimsky@hawq1 postgis]$ sudo make -j8
+for s in doc liblwgeom libpgcommon postgis regress raster topology loader utils ; do \
+		echo "---- Making all in ${s}"; \
+		make -C ${s} all || exit 1; \
+	done;
+---- Making all in doc
+make[1]: Entering directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/doc'
+
+configure was unable to find the Docbook XSL stylesheet directory
+which is required to build the documentation.
+Install the Docbook XSL stylesheets and/or re-run configure
+with the --with-xsldir option.
+Alternatively refer to online manual:
+
+  http://postgis.net/documentation
+
+make[1]: Leaving directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/doc'
+---- Making all in liblwgeom
+make[1]: Entering directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/liblwgeom'
+make[1]: Nothing to be done for `all'.
+...생략
+---- Making all in utils
+make[1]: Entering directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/utils'
+Makefile:54: warning: overriding commands for target `uninstall'
+/usr/local/hawq/default/lib/postgresql/pgxs/src/makefiles/pgxs.mk:153: warning: ignoring old commands for target `uninstall'
+Makefile:57: warning: overriding commands for target `install'
+/usr/local/hawq/default/lib/postgresql/pgxs/src/makefiles/pgxs.mk:91: warning: ignoring old commands for target `install'
+Makefile:60: warning: overriding commands for target `clean'
+/usr/local/hawq/default/lib/postgresql/pgxs/src/makefiles/pgxs.mk:181: warning: ignoring old commands for target `clean'
+sed 's,@SRID_MAXIMUM@,999999,g;s,@SRID_USER_MAXIMUM@,998999,' postgis_restore.pl.in >postgis_restore.pl
+chmod +x postgis_restore.pl create_undef.pl svn_repo_revision.pl postgis_proc_upgrade.pl profile_intersects.pl test_estimation.pl test_joinestimation.pl
+make[1]: Leaving directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/utils'
+PostGIS was built successfully. Ready to install.
+[hskimsky@hawq1 postgis]$
+----
+
+==== PostGIS for Apache HAWQ install
+
+[source,bash]
+----
+sudo make install
+----
+
+[source,log]
+----
+[hskimsky@hawq1 postgis]$ sudo make install
+for s in doc liblwgeom libpgcommon postgis regress raster topology loader utils ; do \
+		echo "---- Making all in ${s}"; \
+		make -C ${s} all || exit 1; \
+	done;
+---- Making all in doc
+make[1]: Entering directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/doc'
+
+configure was unable to find the Docbook XSL stylesheet directory
+which is required to build the documentation.
+Install the Docbook XSL stylesheets and/or re-run configure
+with the --with-xsldir option.
+Alternatively refer to online manual:
+
+  http://postgis.net/documentation
+
+make[1]: Leaving directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/doc'
+---- Making all in liblwgeom
+make[1]: Entering directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/liblwgeom'
+make[1]: Nothing to be done for `all'.
+...생략
+---- Making install in utils
+make[1]: Entering directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/utils'
+Makefile:54: warning: overriding commands for target `uninstall'
+/usr/local/hawq/default/lib/postgresql/pgxs/src/makefiles/pgxs.mk:153: warning: ignoring old commands for target `uninstall'
+Makefile:57: warning: overriding commands for target `install'
+/usr/local/hawq/default/lib/postgresql/pgxs/src/makefiles/pgxs.mk:91: warning: ignoring old commands for target `install'
+Makefile:60: warning: overriding commands for target `clean'
+/usr/local/hawq/default/lib/postgresql/pgxs/src/makefiles/pgxs.mk:181: warning: ignoring old commands for target `clean'
+chmod +x postgis_restore.pl create_undef.pl svn_repo_revision.pl postgis_proc_upgrade.pl profile_intersects.pl test_estimation.pl test_joinestimation.pl
+mode=install /bin/sh ../install-sh postgis_restore.pl "/usr/local/hawq/default/share/postgresql/contrib/postgis-2.0/postgis_restore.pl"
+make[1]: Leaving directory `/home/hskimsky/Downloads/hawqgis/incubator-hawq/contrib/postgis/utils'
+[hskimsky@hawq1 postgis]$
+----
+
+==== 새로 설치 된 library 권한 변경
+
+[source,bash]
+----
+sudo chown -R hskimsky:hskimsky /usr/local/hawq/default
+----
+
+[source,log]
+----
+[hskimsky@hawq1 postgis]$ sudo chown -R hskimsky:hskimsky /usr/local/hawq/default
+[hskimsky@hawq1 postgis]$
+----
+
+==== hawq start cluster
+
+hawq master node 에서 hawq cluster 를 시작합니다.
+
+[source,bash]
+----
+hawq start cluster
+----
+
+[source,log]
+----
+[hskimsky@hawq2 ~]$ hawq start cluster
+20160707:22:28:10:005583 hawq_start:hawq2:hskimsky-[INFO]:-Prepare to do 'hawq start'
+20160707:22:28:10:005583 hawq_start:hawq2:hskimsky-[INFO]:-You can find log in:
+20160707:22:28:10:005583 hawq_start:hawq2:hskimsky-[INFO]:-/home/hskimsky/hawqAdminLogs/hawq_start_20160707.log
+20160707:22:28:10:005583 hawq_start:hawq2:hskimsky-[INFO]:-GPHOME is set to:
+20160707:22:28:10:005583 hawq_start:hawq2:hskimsky-[INFO]:-/usr/local/hawq/default
+20160707:22:28:10:005583 hawq_start:hawq2:hskimsky-[INFO]:-Start hawq with args: ['start', 'cluster']
+20160707:22:28:10:005583 hawq_start:hawq2:hskimsky-[INFO]:-Gathering information and validating the environment...
+20160707:22:28:10:005583 hawq_start:hawq2:hskimsky-[INFO]:-Start all the nodes in hawq cluster
+20160707:22:28:10:005583 hawq_start:hawq2:hskimsky-[INFO]:-Starting standby master 'hawq1.apache.local'
+20160707:22:28:10:005583 hawq_start:hawq2:hskimsky-[INFO]:-Start standby master service
+20160707:22:28:19:005583 hawq_start:hawq2:hskimsky-[INFO]:-Checking standby master status
+20160707:22:28:14:020826 hawqstandbywatch.py:hawq1:hskimsky-[INFO]:-Monitoring logs
+20160707:22:28:19:020826 hawqstandbywatch.py:hawq1:hskimsky-[INFO]:-checking if syncmaster is running
+20160707:22:28:19:020826 hawqstandbywatch.py:hawq1:hskimsky-[INFO]:-syncmaster appears ok, pid 20810
+20160707:22:28:19:005583 hawq_start:hawq2:hskimsky-[INFO]:-Standby master started successfully
+20160707:22:28:19:005583 hawq_start:hawq2:hskimsky-[INFO]:-Starting master node 'hawq2.apache.local'
+20160707:22:28:19:005583 hawq_start:hawq2:hskimsky-[INFO]:-Start master service
+20160707:22:28:28:005583 hawq_start:hawq2:hskimsky-[INFO]:-Checking if standby is synced with master
+20160707:22:28:32:005583 hawq_start:hawq2:hskimsky-[INFO]:-Standby master is synced
+20160707:22:28:32:005583 hawq_start:hawq2:hskimsky-[INFO]:-Master started successfully
+20160707:22:28:32:005583 hawq_start:hawq2:hskimsky-[INFO]:-Start all the segments in hawq cluster
+20160707:22:28:32:005583 hawq_start:hawq2:hskimsky-[INFO]:-Start segments in list: ['hawq3.apache.local', 'hawq4.apache.local']
+20160707:22:28:32:005583 hawq_start:hawq2:hskimsky-[INFO]:-Start segment service
+20160707:22:28:32:005583 hawq_start:hawq2:hskimsky-[INFO]:-Total segment number is: 2
+...............................
+.
+20160707:22:29:05:005583 hawq_start:hawq2:hskimsky-[INFO]:-2 of 2 segments start successfully
+20160707:22:29:05:005583 hawq_start:hawq2:hskimsky-[INFO]:-Segments started successfully
+20160707:22:29:05:005583 hawq_start:hawq2:hskimsky-[INFO]:-HAWQ cluster started successfully
+[hskimsky@hawq2 ~]$
+----
+
+=== PostGIS for Apache HAWQ install
+
+==== add PostGIS
+
+[source,bash]
+----
+cd /root/Downloads/hawqgis/incubator-hawq/contrib/postgis/postgis
+\cp /root/Downloads/hawqgis/incubator-hawq/contrib/postgis/postgis/postgis.sql /usr/local/hawq/default/share/postgresql/contrib/postgis-2.0/
+\cp /root/Downloads/hawqgis/incubator-hawq/contrib/postgis/postgis/postgis_upgrade_20_minor.sql /usr/local/hawq/default/share/postgresql/contrib/postgis-2.0/
+\cp /root/Downloads/hawqgis/incubator-hawq/contrib/postgis/postgis/uninstall_postgis.sql /usr/local/hawq/default/share/postgresql/contrib/postgis-2.0/
+----
+
+postgis.sql 변경사항
+
+* primary key 주석
+* create rule 주석
+
+[source,bash]
+----
+cd /usr/local/hawq/default/share/postgresql/contrib/postgis-2.0
+psql -h hawq2 -f postgis.sql -d postgis
+psql -h hawq2 -f postgis_comments.sql -d postgis
+psql -h hawq2 -f legacy.sql -d postgis
+psql -h hawq2 -f legacy_minimal.sql -d postgis
+----
+
+==== test PostGIS
+
+[source,sql]
+----
+select st_astext(ST_GeomFromText('LINESTRING(0 0, 2 4, 5 5)'));
+----
+
+[source,log]
+----
+postgis=# select st_astext(ST_GeomFromText('LINESTRING(0 0, 2 4, 5 5)'));
+        st_astext
+-------------------------
+ LINESTRING(0 0,2 4,5 5)
+(1 row)
+
+postgis=#
+----
+
+`The end. Thanks.`
+
+== References
+
+* https://issues.apache.org/jira/browse/HAWQ-799
+* https://github.com/apache/incubator-hawq/pull/700
