@@ -20,3 +20,7 @@
 * [044. 기본교양 게임문학의 잉해](https://soundcloud.com/ddanzi/u-44?in=wanderatdawn/sets/ddanzi-xsfm)
 * [045. 기본교양 게임문화의 잉해](https://soundcloud.com/ddanzi/u-45?in=wanderatdawn/sets/ddanzi-xsfm)
 * [046. 신인류 연대기:모바일 전투](https://soundcloud.com/ddanzi/u-46?in=wanderatdawn/sets/ddanzi-xsfm)
+
+## Timeline
+
+![Timeline](timeline/all.png)
